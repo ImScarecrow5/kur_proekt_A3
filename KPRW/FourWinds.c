@@ -196,11 +196,11 @@ int roseWinds(int length, int width)
     return -1;
 }
 
-void lastField()
+void lastField(int pos)
 {
     FILE* fp;
     fp = fopen("data.txt", "r");
-    fseek(fp, -38, SEEK_END);
+    fseek(fp, -pos, SEEK_END);
     if (fp == NULL)
     {
         printf("В файле нечего читать\n");
