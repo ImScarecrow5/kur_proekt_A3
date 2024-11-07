@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
-
+#include <time.h>
 
 char field[N][N];
 
@@ -11,32 +11,51 @@ int coord1[N];
 int coord2[N];
 int sumcoords[N];
 
+int cd3[N];
+int cd[N];
+
+char readField[N];
+
+int correctField(int blackPoint, int x, int y)
+{
+    if (field[x][y] == '#') return 1;
+    return 0;
+}
+
 int inArr(int arr1[N], int arr2[N], int a, int b, int blpoint)
 {
     for (int i = 0; i < blpoint; ++i)
     {
         if (arr1[i] == a && arr2[i] == b) return 0;
     }
+}
+
+int inArr1(int arr1[N], int a, int b)
+{
+    for (int i = 0; i < b; ++i)
+    {
+        if (arr1[i] == a) return 0;
+    }
 
     return 1;
 }
 
-int main(void)
+int inArr2(int arr2[N], int a, int b)
 {
-    setlocale(LC_ALL, "");
+    for (int i = 0; i < b; ++i)
+    {
+        if (arr2[i] == a) return 0;
+    }
 
-    puts("Введите длину поля: ");
-    int length;
-    scanf("%d", &length);
+    return 1;
+}
 
-    puts("Введите длину поля: ");
-    int width;
-    scanf("%d", &width);
-
+int roseWinds(int length, int width)
+{
     srand(time(0));
-    int blackPoint = rand() % (length * width);
-    //printf("%d\n", blackPoint);
-
+    int blackPoint = rand() % (length * width - 1);
+    int m = max(length, width);
+    if (blackPoint < m) blackPoint = m;
     // заполнение поле "белыми клетками"
     for (int i = 0; i < length; ++i)
     {
@@ -46,16 +65,92 @@ int main(void)
         }
     }
 
+    for (int i = 0; i < m; ++i)
+    {
+        coord1[i] = -1;
+        coord2[i] = -1;
+    }
+
     int c1, c2;
+
+    int flag = 0;
+    
+    int rd = 0;
+    int e;
+
+    printf("%d %d \n", m, rd);
+
+    if (rd)
+    {
+        e = length;
+        if (width == 1)
+        {
+            e = width;
+            c1 = rand() % length; // строки
+            c2 = rand() % width; // столбцы
+            coord1[flag] = c1;
+            coord2[flag] = c2;
+            field[c1][c2] = '#';
+            ++flag;
+        }
+        else
+        {
+            while (flag < length)
+            {
+                c1 = rand() % length; // строки
+                c2 = rand() % width; // столбцы
+                int a1 = inArr1(coord1, c1, length);
+                if (a1)
+                {
+                    coord1[flag] = c1;
+                    coord2[flag] = c2;
+                    field[c1][c2] = '#';
+                    ++flag;
+                }
+            }
+        }
+    }
+    else
+    {
+        e = width;
+        if (length == 1)
+        {
+            e = length;
+            c1 = rand() % length; // строки
+            c2 = rand() % width; // столбцы
+            coord1[flag] = c1;
+            coord2[flag] = c2;
+            field[c1][c2] = '#';
+            ++flag;
+        }
+        else
+        {
+            while (flag < width)
+            {
+                c1 = rand() % length; // строки
+                c2 = rand() % width; // столбцы
+                int a2 = inArr2(coord2, c2, width);
+                if (a2)
+                {
+                    coord1[flag] = c1;
+                    coord2[flag] = c2;
+                    field[c1][c2] = '#';
+                    ++flag;
+                }
+            }
+        }
+    }
+    
+
     // создание черных клеток
-    for (int i = 0; i < blackPoint; ++i)
+    for (int i = 0; i < blackPoint - e; ++i)
     {
         int flag = 0;
         while (flag == 0)
         {
             c1 = rand() % length; // строки
             c2 = rand() % width; // столбцы
-            int a = inArr(coord1, coord2, c1, c2, blackPoint);
+            int a = inArr(coord1, coord2, c1, c2, blackPoint - e);
             if (a != 0)
             {
                 coord1[i] = c1;
@@ -67,7 +162,7 @@ int main(void)
         field[coord1[i]][coord2[i]] = '#';
     }
 
-    // отрисовка игрового поля без линий
+
     for (int i = 0; i < length; ++i)
     {
         for (int j = 0; j < width; ++j)
@@ -77,179 +172,100 @@ int main(void)
         printf("\n");
     }
 
-    printf("\n");
-
-    //for (int i = 0; i < blackPoint; ++i)
-    //{
-    //    printf("%d %d\n", coord1[i], coord2[i]);
-    //}
-
-    // сортировка координат
-    for (int i = 0; i + 1 < blackPoint; ++i)
+    puts("Записать поле в файл? (Введите 1)");
+    puts("Иначе введите 0");
+    int a;
+    scanf("%d", &a);
+    if (a == 1)
     {
-        for (int j = 0; j + 1 < blackPoint - i; ++j)
+        FILE* fp;
+        fp = fopen("data.txt", "a");
+        for (int i = 0; i < length; ++i)
         {
-            if (coord1[j + 1] < coord1[j])
+            for (int j = 0; j < width; ++j)
             {
-                int t = coord1[j];
-                coord1[j] = coord1[j + 1];
-                coord1[j + 1] = t;
-                t = coord2[j];
-                coord2[j] = coord2[j + 1];
-                coord2[j + 1] = t;
+                fprintf(fp, "%c", field[i][j]);
             }
+            fprintf(fp, "\n");
         }
+        fprintf(fp, " \n");
+
+        fclose(fp);
+        return (length + 1) * (width + 1);
+    }
+    return -1;
+}
+
+void lastField()
+{
+    FILE* fp;
+    fp = fopen("data.txt", "r");
+    fseek(fp, -38, SEEK_END);
+    if (fp == NULL)
+    {
+        printf("В файле нечего читать\n");
+        return;
     }
 
-    //for (int i = 0; i < blackPoint; ++i)
-    //{
-    //    printf("%d %d\n", coord1[i], coord2[i]);
-    //}
-
-    // создание линий coord1 - строки, coord2 - столбцы
-    for (int point = 0; point < blackPoint; ++point)
+    int i = 0;
+    fscanf(fp, "%c", &readField[i]);
+    if (!readField[i])
     {
-        int whiteCells = 0;
-        int coordstart = 0;
-        int l = coord1[point];
-        int w = coord2[point];
-        for (int i = 0; i < coord2[point]; ++i) {
-            if (coordstart >= coord2[point]) break;
-            else if (field[l][i] == '#' || field[l][i] == '-' || field[l][i] == '|')
-            {
-                coordstart = i + 1;
-                whiteCells = 0;
-                continue;
-            }
-            else if (field[l][i] == '*')
-            {
-                ++whiteCells;
-            }
-        }
-
-        if (whiteCells != 0)
-        {
-            // отрисовка горизонтальных линий слева
-            for (int i = coordstart; i < coord2[point]; ++i)
-            {
-                field[l][i] = '-';
-            }
-        }
-
-        sumcoords[point] += whiteCells;
-        whiteCells = 0;
-
-        coordstart = coord2[point];
-
-        for (int i = coord2[point] + 1; i < width; ++i) 
-        {
-            if (field[l][i] == '#' || field[l][i] == '-' || field[l][i] == '|')
-            {
-                break;
-            }
-            else if (field[l][i] == '*')
-            {
-                ++coordstart;
-                ++whiteCells;
-            }
-        }
-
-        if (whiteCells != 0)
-        {
-            // отрисовка горизонтальных линий справа
-            for (int i = coord2[point] + 1; i < coordstart + 1; ++i)
-            {
-                field[l][i] = '-';
-            }
-        }
-
-        sumcoords[point] += whiteCells;
-        whiteCells = 0;
-
-
-        coordstart = 0;
-
-        for (int i = 0; i < coord1[point]; ++i)
-        {
-            if (coordstart >= coord1[point]) break;
-            else if (field[i][w] == '#' || field[i][w] == '-' || field[i][w] == '|')
-            {
-                coordstart = i + 1;
-                whiteCells = 0;
-                continue;
-            }
-            else if (field[i][w] == '*')
-            {
-                ++whiteCells;
-            }
-        }
-
-        if (whiteCells != 0)
-        {
-            // отрисовка вертикальных линий сверху
-            for (int i = coordstart; i < coord1[point]; ++i)
-            {
-                field[i][w] = '|';
-            }
-        }
-
-        sumcoords[point] += whiteCells;
-        whiteCells = 0;
-        coordstart = coord1[point] + 1;
-
-        for (int i = coord1[point] + 1; i < length; ++i)
-        {
-            if (field[i][w] == '#' || field[i][w] == '-' || field[i][w] == '|')
-            {
-                break;
-            }
-            else if (field[i][w] == '*')
-            {
-                ++coordstart;
-                ++whiteCells;
-            }
-        }
-
-        if (whiteCells != 0)
-        {
-            // отрисовка вертикальных линий снизу
-            for (int i = coord1[point] + 1; i < coordstart + 1; ++i)
-            {
-                field[i][w] = '|';
-            }
-        }
-        sumcoords[point] += whiteCells;
+        printf("В файле нечего читать\n");
+        return;
     }
+    else printf("%c", readField[i]);
+    ++i;
 
-    // добавление к черному квадрату его кол-во линий
-    for (int point = 0; point < blackPoint; ++point) field[coord1[point]][coord2[point]] = sumcoords[point] + '0';
-
-    // отрисовка рамка ч.1
-    printf(" _");
-    for (int i = 0; i < width; ++i) printf("_");
-    printf("_\n| ");
-    for (int i = 0; i < width; ++i) printf(" ");
-    printf(" |\n");
-
-    // отрисовка результата (поле)
-    for (int i = 0; i < length; ++i)
+    while (fscanf(fp, "%c", &readField[i]) != NULL)
     {
-        printf("| ");
-        for (int j = 0; j < width; ++j)
+        if (readField[i] == ' ') return;
+        if (!readField[i])
         {
-            printf("%c", field[i][j]);
+            return;
         }
-        /*if (i == length - 1)
+        printf("%c", readField[i]);
+        ++i;
+    }
+}
+
+void question()
+{
+    puts("Завершить выполнение программы? (Введите 0)");
+    puts("Создать новое поле? (Введите 1)");
+    puts("Вывести последнее поле из файла? (Введите 2)");
+}
+
+int main(void)
+{
+    setlocale(LC_ALL, "RUS");
+    int d = -1;
+    int flag = 1;
+    while (flag)
+    {
+        question();
+        unsigned ans;
+        scanf("%d", &ans);
+
+        switch (ans)
         {
-            printf(" |");
+        case 1:
+            puts("Введите длину поля: ");
+            int length;
+            scanf("%d", &length);
+
+            puts("Введите ширину поля: ");
+            int width;
+            scanf("%d", &width);
+            d = roseWinds(length, width);
             break;
-        }*/
-        printf(" |\n");
+        case 0:
+            flag = 0;
+            break;
+        case 2:
+            if (d != -1) lastField(d);
+            else puts("Запишите хотя бы 1 поле за время выполнения программы");
+            break;
+        }
     }
-
-
-    // отрисовка рамки ч.2
-    printf("|_");
-    for (int i = 0; i < width; ++i) printf("_");
-    printf("_|");
 }
