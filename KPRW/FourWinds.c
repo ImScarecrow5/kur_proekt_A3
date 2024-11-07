@@ -75,7 +75,7 @@ int roseWinds(int length, int width)
 
     int flag = 0;
     
-    int rd = 0;
+    int rd = rand() % 2;
     int e;
 
     printf("%d %d \n", m, rd);
