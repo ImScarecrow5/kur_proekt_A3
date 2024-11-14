@@ -1,4 +1,4 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #define N 10000
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,10 +50,50 @@ int inArr2(int arr2[N], int a, int b)
     return 1;
 }
 
-int roseWinds(int length, int width)
+int findLastId()
+{
+    FILE* fp;
+
+    struct information {
+        char name[7];
+        int id;
+        char namelen[9];
+        int length;
+        char namewidth[9];
+        int width;
+    };
+    struct information inf[N];
+
+    fp = fopen("data.txt", "r");
+
+    if (fp == NULL) return 0;
+
+    int i = 0;
+
+    while (fscanf(fp, "%s%d%s%d%s%d", &(inf[i].name), &(inf[i].id), &(inf[i].namelen), &(inf[i].length), &(inf[i].namewidth), &(inf[i].width)) != EOF)
+    {
+        fseek(fp, ((inf[i].length + 1) * (inf[i].width + 1) + 2), SEEK_CUR);
+        ++i;
+    }
+    return i;
+}
+
+void roseWinds(int length, int width)
 {
     srand(time(0));
-    int blackPoint = rand() % (length * width - 1);
+    /*puts("Хотите самостоятельно ввести кол-во черных клеток?");*/
+    char h[3];
+    int blackPoint;
+    /*if (scanf("%s", &h) == "да")
+    {
+        while (blackPoint < length * width - 1)
+        {
+            puts("введите кол-во черных клеток: ");
+            scanf("%d", blackPoint);
+            if (blackPoint >= length * width - 1) puts("Некорретные данные");
+        }
+    }
+    else */blackPoint = rand() % (length * width - 1);
     int m = max(length, width);
     if (blackPoint < m) blackPoint = m;
     // заполнение поле "белыми клетками"
@@ -75,10 +115,10 @@ int roseWinds(int length, int width)
 
     int flag = 0;
     
-    int rd = rand() % 2;
+    int rd = 0;
     int e;
 
-    printf("%d %d \n", m, rd);
+    //printf("%d %d \n", m, rd);
 
     if (rd)
     {
@@ -180,6 +220,11 @@ int roseWinds(int length, int width)
     {
         FILE* fp;
         fp = fopen("data.txt", "a");
+
+        int id = findLastId();
+
+        fprintf(fp, "Field: %d Length: %d Width: %d\n", ++id, length, width);
+
         for (int i = 0; i < length; ++i)
         {
             for (int j = 0; j < width; ++j)
@@ -188,19 +233,28 @@ int roseWinds(int length, int width)
             }
             fprintf(fp, "\n");
         }
-        fprintf(fp, " \n");
+        fprintf(fp, "\n");
 
         fclose(fp);
-        return (length + 1) * (width + 1);
     }
-    return -1;
 }
 
-void lastField(int pos)
+void lastField()
 {
     FILE* fp;
+
+    struct information {
+        char name[10];
+        int id;
+        char namelen[8];
+        int length;
+        char namewidth[7];
+        int width;
+    };
+    struct information inf[N];
+
     fp = fopen("data.txt", "r");
-    fseek(fp, -pos, SEEK_END);
+
     if (fp == NULL)
     {
         printf("В файле нечего читать\n");
@@ -208,24 +262,29 @@ void lastField(int pos)
     }
 
     int i = 0;
-    fscanf(fp, "%c", &readField[i]);
-    if (!readField[i])
+    int size = ftell(fp);
+    int d = 0;
+    while (fscanf(fp, "%s%d%s%d%s%d", &(inf[i].name), &(inf[i].id), &(inf[i].namelen), &(inf[i].length), &(inf[i].namewidth), &(inf[i].width)) != EOF)
     {
-        printf("В файле нечего читать\n");
-        return;
-    }
-    else printf("%c", readField[i]);
-    ++i;
-
-    while (fscanf(fp, "%c", &readField[i]) != NULL)
-    {
-        if (readField[i] == ' ') return;
-        if (!readField[i])
-        {
-            return;
-        }
-        printf("%c", readField[i]);
+        if ((inf[i].length) < 1) continue;
+        int size = ftell(fp);
+        int pos = (inf[i].length) * (inf[i].width + 1);
+        // d = pos - ((inf[i].length) * (inf[i].width));
+        fseek(fp, pos, SEEK_CUR);
+        size = ftell(fp);
         ++i;
+    }
+    --i;
+    size = ftell(fp);
+    int pos = (inf[i].length + 1) * (inf[i].width + 1) + 1;
+    fseek(fp, -pos, SEEK_CUR);
+    size = ftell(fp);
+
+    char arrf[N];
+    while (fgets(arrf, inf[i].width, fp) != NULL)
+    {
+        if (arrf[0] != '*' && arrf[0] != '#') continue;
+        printf("%s", arrf);
     }
 }
 
@@ -257,14 +316,13 @@ int main(void)
             puts("Введите ширину поля: ");
             int width;
             scanf("%d", &width);
-            d = roseWinds(length, width);
+            roseWinds(length, width);
             break;
         case 0:
             flag = 0;
             break;
         case 2:
-            if (d != -1) lastField(d);
-            else puts("Запишите хотя бы 1 поле за время выполнения программы");
+            lastField();
             break;
         }
     }
