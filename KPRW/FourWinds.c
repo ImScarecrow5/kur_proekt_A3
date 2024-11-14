@@ -55,18 +55,18 @@ int findLastId()
     FILE* fp;
 
     struct information {
-        char name[7];
+        char name[10];
         int id;
-        char namelen[9];
+        char namelen[8];
         int length;
-        char namewidth[9];
+        char namewidth[7];
         int width;
     };
     struct information inf[N];
 
     fp = fopen("data.txt", "r");
 
-    if (fp == NULL) return 0;
+    if (fp == NULL) return 1;
 
     int i = 0;
 
@@ -239,6 +239,63 @@ void roseWinds(int length, int width)
     }
 }
 
+void showField(int key)
+{
+    FILE* fp;
+
+    struct information {
+        char name[10];
+        int id;
+        char namelen[8];
+        int length;
+        char namewidth[7];
+        int width;
+    };
+    struct information inf[N];
+
+    fp = fopen("data.txt", "r");
+
+    if (fp == NULL)
+    {
+        printf("В файле нечего читать\n");
+        return;
+    }
+
+    int i = 0;
+    int flag = 0;
+    while (fscanf(fp, "%s%d%s%d%s%d", &(inf[i].name), &(inf[i].id), &(inf[i].namelen), &(inf[i].length), &(inf[i].namewidth), &(inf[i].width)) != EOF)
+    {
+        if ((inf[i].length) < 1) continue;
+        int pos = (inf[i].length) * (inf[i].width + 1);
+        fseek(fp, pos, SEEK_CUR);
+        ++i;
+        if (key == i)
+        {
+            flag = 1;
+            break;
+        }
+    }
+
+    --i;
+
+    if (!flag)
+    {
+        puts("В файле нет поля с таким ключом");
+        return;
+    }
+
+    int pos = (inf[i].length + 1) * (inf[i].width + 1) + 1;
+    fseek(fp, -pos, SEEK_CUR);
+
+    char arrf[N];
+    while (fgets(arrf, inf[i].width, fp) != NULL)
+    {
+        if (arrf[0] == ' ') return;
+        if (arrf[0] != '*' && arrf[0] != '#') continue;
+        printf("%s", arrf);
+    }
+}
+
 void lastField()
 {
     FILE* fp;
@@ -262,23 +319,18 @@ void lastField()
     }
 
     int i = 0;
-    int size = ftell(fp);
     int d = 0;
     while (fscanf(fp, "%s%d%s%d%s%d", &(inf[i].name), &(inf[i].id), &(inf[i].namelen), &(inf[i].length), &(inf[i].namewidth), &(inf[i].width)) != EOF)
     {
         if ((inf[i].length) < 1) continue;
-        int size = ftell(fp);
         int pos = (inf[i].length) * (inf[i].width + 1);
         // d = pos - ((inf[i].length) * (inf[i].width));
         fseek(fp, pos, SEEK_CUR);
-        size = ftell(fp);
         ++i;
     }
     --i;
-    size = ftell(fp);
     int pos = (inf[i].length + 1) * (inf[i].width + 1) + 1;
     fseek(fp, -pos, SEEK_CUR);
-    size = ftell(fp);
 
     char arrf[N];
     while (fgets(arrf, inf[i].width, fp) != NULL)
@@ -293,6 +345,7 @@ void question()
     puts("Завершить выполнение программы? (Введите 0)");
     puts("Создать новое поле? (Введите 1)");
     puts("Вывести последнее поле из файла? (Введите 2)");
+    puts("Вывести определенное поле по ключу (Введите 3)");
 }
 
 int main(void)
@@ -324,6 +377,11 @@ int main(void)
         case 2:
             lastField();
             break;
+        case 3:
+            puts("Введите id: ");
+            int key;
+            scanf("%d", &key);
+            showField(key);
         }
     }
 }
