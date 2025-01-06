@@ -355,7 +355,7 @@ void roseWinds(char* filename, int length, int width)
 
 /*
 -проверяет созданное поле на правильность
--rd - способ создания поля, field[N][N] - игровое поле, 
+-rd - способ создания поля, field[N][N] - игровое поле,
 -coord1 - координаты черных клеток по Oy, coord2 - координаты черных клеток по Ox,
 -length - длина поля, width - ширина поля, blackPoint - количество "главных" черных клеток.
 -ничего не возвращает
@@ -363,7 +363,7 @@ void roseWinds(char* filename, int length, int width)
 void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint)
 {
     int count = 0;
-    if (rd)
+    if (rd || length == 1)
     {
         for (int i = 0; i < length; ++i)
         {
@@ -386,7 +386,7 @@ void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, i
             puts("Поле сгенерировалось неверно");
         }
     }
-    else
+    else if (!rd || width == 1)
     {
         for (int i = 0; i < width; ++i)
         {
