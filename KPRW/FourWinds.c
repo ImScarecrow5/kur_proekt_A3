@@ -15,15 +15,15 @@ struct information {
     int width;
 };
 
-void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint);
-void changeName(char* filename);
+char* check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint);
+char* changeName(char* filename);
 int findLastId(char* filename);
-void writeToAFile(char* filename, int length, int width, char field[N][N]);
-void writeOrNot(char* filename, int length, int width, char field[N][N]);
-void roseWinds(char* filename, int length, int width);
-void showField(char* filename, int key);
-void lastField(char* filename);
-void question();
+char* writeToAFile(char* filename, int length, int width, char field[N][N]);
+char* writeOrNot(char* filename, int length, int width, char field[N][N]);
+char* roseWinds(char* filename, int length, int width);
+char* showField(char* filename, int key);
+char* lastField(char* filename);
+char* question();
 
 int main(void)
 {
@@ -38,9 +38,9 @@ int main(void)
 
     while (flag)
     {
-        question();
-
         printf("Текущее название файла: %s, количество полей в файле: %d\n", filename, findLastId(&filename));
+
+        printf("%s\n", question());
 
         unsigned answer;
         scanf("%d", &answer);
@@ -62,23 +62,23 @@ int main(void)
                 break;
             }
 
-            roseWinds(&filename, length, width);
+            printf("%s\n", roseWinds(&filename, length, width));
             break;
         case 0:
             flag = 0;
             break;
         case 2:
-            lastField(&filename);
+            printf("%s\n", lastField(&filename));
             break;
         case 3:
             puts("Введите id: ");
             int key;
             scanf("%d", &key);
 
-            showField(filename, key);
+            printf("%s\n", showField(filename, key));
             break;
         case 4:
-            changeName(&filename);
+            printf("%s\n", changeName(&filename));
 
             break;
         default:
@@ -117,9 +117,9 @@ int findLastId(char* filename)
 /*
 -записывает поле в файл
 -filename - имя файла, length - длина поля, width - ширина поля, field[N][N] - игровое поле
--ничего не возвращает
+-возвращает информацию о успехе записи в файл
 */
-void writeToAFile(char* filename, int length, int width, char field[N][N])
+char* writeToAFile(char* filename, int length, int width, char field[N][N])
 {
     int id = findLastId(filename);
 
@@ -139,17 +139,17 @@ void writeToAFile(char* filename, int length, int width, char field[N][N])
     }
     fprintf(fp, "\n");
 
-    puts("Запись в файл прошла успешно");
-
     fclose(fp);
+
+    return "Запись в файл прошла успешно";
 }
 
 /*
 -Спрашивает у пользователя, необходимо ли записать поле в файл
 -filename - имя файла, length - длина поля, width - ширина поля, field[N][N] - игровое поле
--ничего не возвращает
+-возвращает информацию о успехе или отмене записи поля в файл
 */
-void writeOrNot(char* filename, int length, int width, char field[N][N])
+char* writeOrNot(char* filename, int length, int width, char field[N][N])
 {
     unsigned answer;
 
@@ -157,15 +157,17 @@ void writeOrNot(char* filename, int length, int width, char field[N][N])
     puts("Иначе введите любую иную цифру для продолжения");
 
     scanf("%d", &answer);
-    if (answer == 1) writeToAFile(filename, length, width, field);
+    if (answer == 1) return writeToAFile(filename, length, width, field);
+
+    return "Запись поля в файл отменена";
 }
 
 /*
 -Меняет название файла, который используется для записи и чтения
 -filename - имя файла
--ничего не возвращает
+-возвращает информацию о успехе смене имени файла
 */
-void changeName(char* filename)
+char* changeName(char* filename)
 {
     puts("Введите названия файла: ");
 
@@ -182,16 +184,16 @@ void changeName(char* filename)
 
     strcpy(filename, filename2);
 
-    puts("Новый файл сохранен по умолчанию");
+    return "Новый файл сохранен по умолчанию";
 
 }
 
 /*
 -создает игровое поле
 -filename - имя файла, length - длина поля, width - ширина поля
--ничего не возвращает
+-возвращает информацию о успехе смене имени файла
 */
-void roseWinds(char* filename, int length, int width)
+char* roseWinds(char* filename, int length, int width)
 {
     int coord1[N];
     int coord2[N];
@@ -349,7 +351,7 @@ void roseWinds(char* filename, int length, int width)
 
     check(rd, field, coord1, coord2, length, width, len);
 
-    writeOrNot(filename, length, width, field);
+    return writeOrNot(filename, length, width, field);
 }
 
 
@@ -358,9 +360,9 @@ void roseWinds(char* filename, int length, int width)
 -rd - способ создания поля, field[N][N] - игровое поле,
 -coord1 - координаты черных клеток по Oy, coord2 - координаты черных клеток по Ox,
 -length - длина поля, width - ширина поля, blackPoint - количество "главных" черных клеток.
--ничего не возвращает
+-возвращает информацию о верности поля
 */
-void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint)
+char* check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint)
 {
     int count = 0;
     if (rd || length == 1)
@@ -379,11 +381,11 @@ void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, i
         }
         if (count == length)
         {
-            puts("Поле сгенерировалось верно");
+            return "Поле сгенерировалось верно";
         }
         else
         {
-            puts("Поле сгенерировалось неверно");
+            return "Поле сгенерировалось неверно";
         }
     }
     else if (!rd || width == 1)
@@ -402,11 +404,11 @@ void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, i
         }
         if (count == width)
         {
-            puts("Поле сгенерировалось верно");
+            return "Поле сгенерировалось верно";
         }
         else
         {
-            puts("Поле сгенерировалось неверно");
+            return "Поле сгенерировалось неверно";
         }
     }
 }
@@ -414,9 +416,9 @@ void check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, i
 /*
 -выводит необходимое поле
 -filename - имя файла, key - ключ
--ничего не возвращает
+-возвращает информацию о успехе вывода поля из файла
 */
-void showField(char* filename, int key)
+char* showField(char* filename, int key)
 {
     FILE* fp;
 
@@ -426,8 +428,7 @@ void showField(char* filename, int key)
 
     if (fp == NULL)
     {
-        printf("В файле нечего читать\n");
-        return;
+        return "В файле нечего читать";
     }
 
     int i = 0;
@@ -449,8 +450,7 @@ void showField(char* filename, int key)
 
     if (!flag)
     {
-        puts("В файле нет требуемого поля");
-        return;
+        return "В файле нет требуемого поля";
     }
 
     int pos = (inf[i].length + 1) * (inf[i].width + 1) + 1;
@@ -467,30 +467,33 @@ void showField(char* filename, int key)
         printf("%s", arrf);
         ++i;
     }
+
+    return "Вывод поля из файла завершен";
 }
 
 /*
 -выводит последнее поле
 -filename - имя файла
--ничего не возвращает
+-возвращает информацию о успехе вывода поля из файла
 */
-void lastField(char* filename)
+char* lastField(char* filename)
 {
     int id = findLastId(filename);
 
-    showField(filename, id);
+    return showField(filename, id);
 }
 
 /*
 -выводит окно с вопросами
 -ничего не принимает
--ничего не возвращает
+-возвращает просьбу ввода цифры в консоль
 */
-void question()
+char* question()
 {
     puts("Завершить выполнение программы? (Введите 0)");
     puts("Создать новое поле? (Введите 1)");
     puts("Вывести последнее поле из файла? (Введите 2)");
     puts("Вывести определенное поле по ключу (Введите 3)");
     puts("Ввести новое имя файла (Введите 4)");
+    return "Введите цифру для продолжения";
 }
