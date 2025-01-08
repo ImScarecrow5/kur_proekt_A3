@@ -349,7 +349,7 @@ char* roseWinds(char* filename, int length, int width)
         printf("\n");
     }
 
-    check(rd, field, coord1, coord2, length, width, len);
+    printf("%s\n", check(rd, field, coord1, coord2, length, width, len));
 
     return writeOrNot(filename, length, width, field);
 }
