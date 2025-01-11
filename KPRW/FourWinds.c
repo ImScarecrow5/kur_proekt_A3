@@ -18,6 +18,7 @@ struct information {
 char* check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint);
 char* changeName(char* filename);
 int findLastId(char* filename);
+int blackCell(int rd, int blackPoint, int length, int width, char field[N][N], int coord1[N], int coord2[N]);
 char* writeToAFile(char* filename, int length, int width, char field[N][N]);
 char* writeOrNot(char* filename, int length, int width, char field[N][N]);
 char* roseWinds(char* filename, int length, int width);
@@ -189,47 +190,21 @@ char* changeName(char* filename)
 }
 
 /*
--создает игровое поле
--filename - имя файла, length - длина поля, width - ширина поля
--возвращает информацию о успехе смене имени файла
+-генерирует черные клетки
+-rd - тип создания клеток, blackPoint - количество черных клеток, 
+-length - длина поля, width - ширина поля,
+-field - игровое поле,
+-int coord1[N], int coord2[N] - координаты черных точек по ширине и длине
+-возвращает количество "основных" черных клеток
 */
-char* roseWinds(char* filename, int length, int width)
+int blackCell(int rd, int blackPoint, int length, int width, char field[N][N], int coord1[N], int coord2[N])
 {
-    int coord1[N];
-    int coord2[N];
-
-    char field[N][N];
-
-    int blackPoint;
-
-    int max = max(length, width);
-    int min = min(length, width);
-
     srand(time(NULL));
-    blackPoint = rand() % (length * width - 1);
 
-    int rd = rand() % 2;
-    int len;
-    if (blackPoint < max && min != 1) blackPoint = max;
-
-    // заполнение всего поля "белыми клетками"
-    for (int i = 0; i < length; ++i)
-    {
-        for (int j = 0; j < width; ++j)
-        {
-            field[i][j] = '*';
-        }
-    }
-
-    for (int i = 0; i < max; ++i)
-    {
-        coord1[i] = -1;
-        coord2[i] = -1;
-    }
 
     int c1, c2;
-
     int flag = 0;
+    int len;
 
     // генерация координат черных клеток
     if (rd)
@@ -339,6 +314,50 @@ char* roseWinds(char* filename, int length, int width)
 
         field[coord1[i]][coord2[i]] = '#';
     }
+
+    return len;
+}
+
+/*
+-создает игровое поле
+-filename - имя файла, length - длина поля, width - ширина поля
+-возвращает информацию о успехе или отмене записи поля в файл
+*/
+char* roseWinds(char* filename, int length, int width)
+{
+    int coord1[N];
+    int coord2[N];
+
+    char field[N][N];
+
+    int blackPoint;
+
+    int max = max(length, width);
+    int min = min(length, width);
+
+    srand(time(NULL));
+    blackPoint = rand() % (length * width - 1);
+    int rd = rand() % 2;
+
+    if (blackPoint < max && min != 1) blackPoint = max;
+
+    // заполнение всего поля "белыми клетками"
+    for (int i = 0; i < length; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+        {
+            field[i][j] = '*';
+        }
+    }
+
+    for (int i = 0; i < max; ++i)
+    {
+        coord1[i] = -1;
+        coord2[i] = -1;
+    }
+
+    int len = blackCell(rd, blackPoint, length, width, &field, &coord1, &coord2);
+
 
     for (int i = 0; i < length; ++i)
     {
