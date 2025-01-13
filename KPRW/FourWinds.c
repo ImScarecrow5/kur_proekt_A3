@@ -201,85 +201,56 @@ int blackCell(int rd, int blackPoint, int length, int width, char field[N][N], i
 {
     srand(time(NULL));
 
-
+    int minn = min(length, width);
     int c1, c2;
     int flag = 0;
+    int flag2 = 0; // 0 - length, 1 - width
     int len;
-
-    // генерация координат черных клеток
+    
+    printf("%d | 1 - length, 0 - width\n", rd);
+    
     if (rd)
     {
         len = length;
-        if (width == 1)
-        {
-            len = width;
-            c1 = rand() % length; // строки
-            c2 = rand() % width; // столбцы
-            coord1[flag] = c1;
-            coord2[flag] = c2;
-            field[c1][c2] = '#';
-            ++flag;
-        }
-        else
-        {
-            while (flag < length)
-            {
-                c1 = rand() % length; // строки
-                c2 = rand() % width; // столбцы
-                int a1 = 1;
-                for (int i = 0; i < length; ++i)
-                {
-                    if (coord1[i] == c1)
-                    {
-                        a1 = 0;
-                        break;
-                    }
-                }
-                if (a1)
-                {
-                    coord1[flag] = c1;
-                    coord2[flag] = c2;
-                    field[c1][c2] = '#';
-                    ++flag;
-                }
-            }
-        }
     }
     else
     {
         len = width;
-        if (length == 1)
+        ++flag2;
+    }
+
+    // генерация "основных" черных клеток
+    if (minn == 1)
+    {
+        len = minn;
+        c1 = rand() % length; // строки
+        c2 = rand() % width; // столбцы
+        coord1[flag] = c1;
+        coord2[flag] = c2;
+        field[c1][c2] = '#';
+        ++flag;
+    }
+    else
+    {
+        while (flag < len)
         {
-            len = length;
             c1 = rand() % length; // строки
             c2 = rand() % width; // столбцы
-            coord1[flag] = c1;
-            coord2[flag] = c2;
-            field[c1][c2] = '#';
-            ++flag;
-        }
-        else
-        {
-            while (flag < width)
+            int a1 = 1;
+            for (int i = 0; i < len; ++i)
             {
-                c1 = rand() % length; // строки
-                c2 = rand() % width; // столбцы
-                int a2 = 1;
-                for (int i = 0; i < width; ++i)
+                if ((flag2 && coord2[i] == c2) || (!flag2 && coord1[i] == c1))
                 {
-                    if (coord2[i] == c2)
-                    {
-                        a2 = 0;
-                        break;
-                    }
+                    a1 = 0;
+                    break;
                 }
-                if (a2)
-                {
-                    coord1[flag] = c1;
-                    coord2[flag] = c2;
-                    field[c1][c2] = '#';
-                    ++flag;
-                }
+            }
+            if (a1)
+            {
+                coord1[flag] = c1;
+                coord2[flag] = c2;
+                field[c1][c2] = '#';
+                ++flag;
             }
         }
     }
@@ -384,51 +355,35 @@ char* roseWinds(char* filename, int length, int width)
 char* check(int rd, char field[N][N], int coord1[N], int coord2[N], int length, int width, int blackPoint)
 {
     int count = 0;
-    if (rd || length == 1)
+    int len = 0;
+
+    if (rd || length == 1) len = length;
+    else len = width;
+
+    for (int i = 0; i < len; ++i)
     {
-        for (int i = 0; i < length; ++i)
+        for (int j = 0; j < blackPoint; ++j)
         {
-            for (int j = 0; j < blackPoint; ++j)
+            if (len == length && coord1[j] == i)
             {
-                if (coord1[j] == i)
-                {
-                    ++count;
-                    break;
-                }
+                ++count;
+                break;
             }
-            if (count == i) break;
+            else if (len == width && coord2[j] == i)
+            {
+                ++count;
+                break;
+            }
         }
-        if (count == length)
-        {
-            return "Поле сгенерировалось верно";
-        }
-        else
-        {
-            return "Поле сгенерировалось неверно";
-        }
+        if (count == i) break;
     }
-    else if (!rd || width == 1)
+    if (count == len)
     {
-        for (int i = 0; i < width; ++i)
-        {
-            for (int j = 0; j < blackPoint; ++j)
-            {
-                if (coord2[j] == i)
-                {
-                    ++count;
-                    break;
-                }
-            }
-            if (count == i) break;
-        }
-        if (count == width)
-        {
-            return "Поле сгенерировалось верно";
-        }
-        else
-        {
-            return "Поле сгенерировалось неверно";
-        }
+        return "Поле сгенерировалось верно";
+    }
+    else
+    {
+        return "Поле сгенерировалось неверно";
     }
 }
 
